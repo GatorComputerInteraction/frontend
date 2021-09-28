@@ -2,6 +2,10 @@
 
 _Gator Computer Interaction (HCI Fall 2021)_
 
+## Requirements
+
+- [yarn](https://yarnpkg.com/)
+
 ## Getting Started
 
 ```
