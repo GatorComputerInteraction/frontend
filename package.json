@@ -1,0 +1,55 @@
+{
+  "name": "gci-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for GCI Student Scheduling",
+  "repository": "https://github.com/GatorComputerInteraction/frontend",
+  "author": "Gator Computer Interaction <christophemiller@ufl.edu>",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "start": "webpack serve --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "prepare": "husky install",
+    "serve": "yarn build && node preview-server.js"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.11",
+    "@types/react-dom": "^17.0.8",
+    "@types/react-lazy-load-image-component": "^1.5.1",
+    "@types/react-router-dom": "^5.1.7",
+    "css-loader": "^5.2.6",
+    "css-minimizer-webpack-plugin": "^3.0.2",
+    "cssnano": "^5.0.6",
+    "express": "^4.17.1",
+    "glob": "^7.1.7",
+    "html-webpack-plugin": "^5.3.2",
+    "husky": "^7.0.0",
+    "lint-staged": "^11.0.0",
+    "postcss": "^8.3.5",
+    "prettier": "^2.3.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "sass": "^1.35.1",
+    "sass-loader": "^12.1.0",
+    "sharp": "^0.28.3",
+    "style-loader": "^3.0.0",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.4",
+    "webpack": "^5.41.0",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.8.0"
+  },
+  "resolutions": {
+    "sharp": "0.28.3"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "^4.11.2",
+    "mini-css-extract-plugin": "^1.6.2",
+    "postcss-loader": "^6.1.1",
+    "react-router-dom": "^5.2.0"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  }
+}
