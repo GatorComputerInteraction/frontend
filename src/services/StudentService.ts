@@ -1,12 +1,12 @@
+import { IStudent } from "types/Types";
 import http from "../http-common";
-import IStudent from "../types/Types";
 
 const getAll = () => {
-  return http.get("/Student");
+  return http.get<Array<IStudent>>("/Student");
 };
 
 const getById = (id: number) => {
-  return http.get(`/Student/${id}`);
+  return http.get<IStudent>(`/Student/${id}`);
 };
 
 const StudentService = {

@@ -1,13 +1,16 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import { useAppSelector, useAppDispatch } from "../state";
-import { increment } from "../state/features/example";
 import { ButtonGroup, Grid, Paper, Typography } from "@material-ui/core";
 
 import StudentService from "../services/StudentService";
-import IStudent from "../types/Types";
+import { IStudent } from "../types/Types";
+import "./Schedule.css";
 
 export default () => {
+  let history = useHistory();
+
   const initialStudentState = {
     ufId: -1,
     firstName: "",
@@ -60,6 +63,16 @@ export default () => {
               <Button>Week</Button>
               <Button>Map</Button>
             </ButtonGroup>
+            <Button
+              className="addcoursebutton"
+              color="primary"
+              aria-label="outlined primary button"
+              onClick={() => {
+                history.push("/signup");
+              }}
+            >
+              Add Course
+            </Button>
           </Grid>
         </Grid>
         <Grid container spacing={2}>
