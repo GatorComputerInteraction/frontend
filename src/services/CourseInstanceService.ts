@@ -5,8 +5,15 @@ const getAll = () => {
   return http.get<Array<ICourseInstance>>("/Courseinstance");
 };
 
+const getBySemesterYear = (year: number, semester: string) => {
+  return http.get<Array<ICourseInstance>>(
+    `/Courseinstance/${year}/${semester}`
+  );
+};
+
 const CourseInstanceService = {
   getAll,
+  getBySemesterYear,
 };
 
 export default CourseInstanceService;

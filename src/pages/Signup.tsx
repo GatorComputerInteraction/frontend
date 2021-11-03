@@ -8,6 +8,10 @@ import {
   Collapse,
   IconButton,
   IconButtonProps,
+  FormControl,
+  InputLabel,
+  Input,
+  FormHelperText,
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { styled } from "@material-ui/styles";
@@ -25,14 +29,24 @@ import {
   ITimeslot,
 } from "./../types/Types";
 
+import "./Signup.css";
+
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
 }
 
 export default () => {
-  const semester = "Spring";
-  const year = 2021;
+  // states for interface options
+  const [semester, setSemester] = React.useState("Spring");
+  const [year, setYear] = React.useState(2021);
+  const handleSemesterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSemester(event.target.value);
+  };
+  const handleYearChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setYear(parseInt(event.target.value));
+  };
 
+  // states for backend loaded data
   const initialStudentState = {
     ufId: -1,
     firstName: "",
@@ -49,6 +63,7 @@ export default () => {
   >([]);
   const [timeslots, setTimeslots] = useState<Array<ITimeslot>>([]);
 
+  // dictionary of open cards
   const [expandedDict, setExpandedDict] = React.useState<{
     [key: number]: boolean;
   }>({});
@@ -79,13 +94,10 @@ export default () => {
   };
 
   const getCourseInstances = () => {
-    CourseInstanceService.getAll()
+    CourseInstanceService.getBySemesterYear(year, semester)
       .then((response) => {
-        var filteredCourseInstances = response.data?.filter(
-          (x) => x.semester == semester && x.year == year
-        );
-        setCourseInstances(filteredCourseInstances);
-        console.log(filteredCourseInstances);
+        setCourseInstances(response.data);
+        console.log(response.data);
       })
       .catch((e) => {
         console.log(e);
@@ -153,7 +165,7 @@ export default () => {
 
   const ExpandMore = styled((props: ExpandMoreProps) => {
     const { expand, ...other } = props;
-    return <IconButton {...other} />;
+    return <IconButton {...other} className="dropdown-button" />;
   })(({ theme, expand }) => ({
     transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
     marginLeft: "auto",
@@ -194,7 +206,7 @@ export default () => {
             <CardContent>
               <Typography>Class Number: #{course.instanceId}</Typography>
               <Typography>
-                Class Times: {mapSlotIdToDay(course.slotId)} Periods{" "}
+                Class Times: {mapSlotIdToDay(course.slotId)} Period{" "}
                 {mapSlotIdToPeriods(course.slotId)}
               </Typography>
               <Typography>
@@ -211,10 +223,30 @@ export default () => {
     <>
       <Paper>
         <Grid container spacing={2}>
-          <Grid item xs={12} style={{ padding: "1em" }}></Grid>
-          <div id="coursesParent">
-            {courseInstances.map((course) => courseInstanceComponent(course))}
-          </div>
+          <Grid item xs={12} style={{ padding: "1em" }}>
+            <Typography variant="h3">Course of Schedules</Typography>
+          </Grid>
+          <Grid item xs={4} style={{ padding: "2em" }}>
+            <Typography variant="h5">Options</Typography>
+            <FormControl variant="standard">
+              <InputLabel htmlFor="semester-input">Semester</InputLabel>
+              <Input
+                id="semester-input"
+                value={semester}
+                onChange={handleSemesterChange}
+              />
+            </FormControl>
+            <FormControl variant="standard">
+              <InputLabel htmlFor="year-input">Year</InputLabel>
+              <Input id="year-input" value={year} onChange={handleYearChange} />
+            </FormControl>
+          </Grid>
+          <Grid item xs={8} style={{ padding: "2em" }}>
+            <Typography variant="h5">Courses</Typography>
+            <div id="coursesParent" className="courses-parent">
+              {courseInstances.map((course) => courseInstanceComponent(course))}
+            </div>
+          </Grid>
         </Grid>
       </Paper>
     </>

@@ -1,0 +1,15 @@
+.course-card {
+  height: 100%;
+  width: 100%;
+  line-height: 48px;
+}
+
+.dropdown-button {
+  float: right;
+  height: 100%;
+  top: -8px;
+}
+
+.courses-parent {
+  padding-top: 4px;
+}
