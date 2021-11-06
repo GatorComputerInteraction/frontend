@@ -1,7 +1,8 @@
 .course-card {
   height: 100%;
   width: 100%;
-  line-height: 48px;
+  background-color: #fafafa !important;
+  border-bottom: 1px solid #ccc;
 }
 
 .dropdown-button {
@@ -12,4 +13,58 @@
 
 .courses-parent {
   padding-top: 4px;
+}
+
+.course-details {
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 16px !important;
+  width: 100%;
+}
+
+.course-header {
+  color: rgb(191, 68, 24);
+  padding-bottom: 8px;
+  font-size: 17px;
+}
+
+.text {
+  display: inline-block;
+}
+
+.add-button {
+  float: right;
+}
+
+.outlined {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-color: #ccc;
+}
+
+.sub-text {
+  color: gray;
+  font-size: 12px;
+  margin: 0px;
+  line-height: 24px;
+}
+
+.indicator {
+  display: flex;
+}
+
+.indicator-icon {
+  float: right;
+}
+
+.indicator-icons {
+  display: flex;
+  float: right;
+}
+
+.checkmark {
+  color: rgb(22, 216, 54);
+}
+
+.star {
+  color: rgb(245, 208, 0);
 }

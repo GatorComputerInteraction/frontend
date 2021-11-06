@@ -37,6 +37,12 @@ interface IStudentSchedule {
   instanceId: number;
 }
 
+interface IDegreeCourse {
+  degreeId: number;
+  courseId: number;
+  requirementType: number;
+}
+
 export type {
   IStudent,
   ICourse,
@@ -44,4 +50,5 @@ export type {
   IRequirementType,
   ITimeslot,
   IStudentSchedule,
+  IDegreeCourse,
 };

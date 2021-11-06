@@ -11,9 +11,12 @@ import {
   FormControl,
   InputLabel,
   Input,
-  FormHelperText,
+  Button,
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import AddIcon from "@material-ui/icons/Add";
+import CheckIcon from "@material-ui/icons/Check";
+import StarIcon from "@material-ui/icons/Star";
 import { styled } from "@material-ui/styles";
 
 import StudentService from "../services/StudentService";
@@ -21,12 +24,16 @@ import CourseService from "../services/CourseService";
 import CourseInstanceService from "../services/CourseInstanceService";
 import RequirementTypeService from "../services/RequirementTypeService";
 import TimeslotService from "../services/TimeslotService";
+import StudentScheduleService from "../services/StudentScheduleService";
+import DegreeCourseService from "../services/DegreeCourseService";
 import {
   IStudent,
   ICourse,
   IRequirementType,
   ICourseInstance,
   ITimeslot,
+  IStudentSchedule,
+  IDegreeCourse,
 } from "./../types/Types";
 
 import "./Signup.css";
@@ -37,6 +44,7 @@ interface ExpandMoreProps extends IconButtonProps {
 
 export default () => {
   // states for interface options
+  const studentId = 10001000;
   const [semester, setSemester] = React.useState("Spring");
   const [year, setYear] = React.useState(2021);
   const handleSemesterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +66,10 @@ export default () => {
     Array<ICourseInstance>
   >([]);
   const [courses, setCourses] = useState<Array<ICourse>>([]);
+  const [studentSchedule, setStudentSchedule] = useState<
+    Array<IStudentSchedule>
+  >([]);
+  const [studentDegree, setStudentDegree] = useState<Array<IDegreeCourse>>([]);
   const [requirementType, setRequirementType] = useState<
     Array<IRequirementType>
   >([]);
@@ -79,13 +91,19 @@ export default () => {
     getCourses();
     getCourseInstances();
     getRequirementType();
+    getStudentSchedule();
     getTimeSlots();
     updateExpandedDict();
   }, []);
 
+  useEffect(() => {
+    getStudentDegree();
+  }, [student]);
+
   const getStudent = () => {
-    StudentService.getById(10001000)
+    StudentService.getById(studentId)
       .then((response) => {
+        console.log(response.data);
         setStudent(response.data);
       })
       .catch((e) => {
@@ -125,6 +143,16 @@ export default () => {
       });
   };
 
+  const getStudentSchedule = () => {
+    StudentScheduleService.getByUfId(studentId)
+      .then((response) => {
+        setStudentSchedule(response.data);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   const getTimeSlots = () => {
     TimeslotService.getAll()
       .then((response) => {
@@ -135,10 +163,32 @@ export default () => {
       });
   };
 
+  const getStudentDegree = () => {
+    DegreeCourseService.getByDegreeId(student.degreeId)
+      .then((response) => {
+        setStudentDegree(response.data);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   const updateExpandedDict = () => {
     courseInstances.forEach(
       (course) => (expandedDict[course.instanceId] = false)
     );
+  };
+
+  const addCourse = (id: number) => {
+    var data = { ufId: studentId, instanceId: id };
+    StudentScheduleService.post(data)
+      .then((response) => {
+        getStudentSchedule();
+        console.log(studentSchedule);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   const mapCourseIdToCredits = (id: number) => {
@@ -171,47 +221,86 @@ export default () => {
     marginLeft: "auto",
   }));
 
-  var shouldExpand = (i: number) => {
+  const shouldExpand = (i: number) => {
     return i in expandedDict ? expandedDict[i] : false;
+  };
+
+  const courseIsDuplicate = (id: number) => {
+    return (
+      studentSchedule.find((record) => record.instanceId == id) !== undefined
+    );
+  };
+
+  const courseIsRequired = (id: number) => {
+    return studentDegree.find((record) => record.courseId == id) !== undefined;
+  };
+
+  const IndicatorIcons = (instanceId: number, courseId: number) => {
+    return (
+      <div className="indicator-icons">
+        {courseIsDuplicate(instanceId) ? (
+          <div className="indicator">
+            <CheckIcon className="indicator-icon checkmark" />
+            <p className="sub-text">Scheduled</p>
+          </div>
+        ) : (
+          ""
+        )}
+        {courseIsRequired(courseId) ? (
+          <div className="indicator">
+            <StarIcon className="indicator-icon star" />
+            <p className="sub-text">Required</p>
+          </div>
+        ) : (
+          ""
+        )}
+      </div>
+    );
   };
 
   var courseInstanceComponent = (course: ICourseInstance) => {
     return (
       <Card id={"course" + course.instanceId} className="course-card">
         <CardContent>
-          <Typography>
-            Course Name: {mapCourseIdToName(course.courseId)}
+          <Typography className="course-header">
+            {mapCourseIdToName(course.courseId)}
             <ExpandMore
-              expand={
-                course.instanceId in expandedDict
-                  ? expandedDict[course.instanceId]
-                  : false
-              }
+              expand={shouldExpand(course.instanceId)}
               onClick={() => handleExpandClick(course.instanceId)}
-              aria-expanded={
-                course.instanceId in expandedDict
-                  ? expandedDict[course.instanceId]
-                  : false
-              }
+              aria-expanded={shouldExpand(course.instanceId)}
               aria-label="show more"
             >
               <ExpandMoreIcon />
             </ExpandMore>
+            {IndicatorIcons(course.instanceId, course.courseId)}
           </Typography>
           <Collapse
             in={shouldExpand(course.instanceId)}
             timeout="auto"
             unmountOnExit
           >
-            <CardContent>
-              <Typography>Class Number: #{course.instanceId}</Typography>
-              <Typography>
-                Class Times: {mapSlotIdToDay(course.slotId)} Period{" "}
-                {mapSlotIdToPeriods(course.slotId)}
-              </Typography>
-              <Typography>
-                Credits: {mapCourseIdToCredits(course.courseId)}
-              </Typography>
+            <CardContent className="course-details outlined">
+              <div className="text">
+                <Typography>Class Number: #{course.instanceId}</Typography>
+                <Typography>
+                  Class Times: {mapSlotIdToDay(course.slotId)} Period{" "}
+                  {mapSlotIdToPeriods(course.slotId)}
+                </Typography>
+                <Typography>
+                  Credits: {mapCourseIdToCredits(course.courseId)}
+                </Typography>
+              </div>
+              <Button
+                className="add-button"
+                color="primary"
+                aria-label="outlined primary button"
+                onClick={() => addCourse(course.instanceId)}
+                disabled={courseIsDuplicate(course.instanceId)}
+                size="small"
+              >
+                <AddIcon />
+                Add Course
+              </Button>
             </CardContent>
           </Collapse>
         </CardContent>
@@ -243,8 +332,12 @@ export default () => {
           </Grid>
           <Grid item xs={8} style={{ padding: "2em" }}>
             <Typography variant="h5">Courses</Typography>
-            <div id="coursesParent" className="courses-parent">
-              {courseInstances.map((course) => courseInstanceComponent(course))}
+            <div id="coursesParent" className="courses-parent outlined">
+              {courseInstances.length > 0 ? (
+                courseInstances.map((course) => courseInstanceComponent(course))
+              ) : (
+                <Typography>There are no courses available.</Typography>
+              )}
             </div>
           </Grid>
         </Grid>
