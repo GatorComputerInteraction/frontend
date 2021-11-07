@@ -19,21 +19,27 @@ export default () => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <ConnectedRouter history={browserHistory}>
-        <AppBar position="static">
+        <AppBar
+          position="static"
+          style={{
+            borderColor: "transparent transparent orange transparent",
+            borderStyle: "solid",
+          }}
+        >
           <Toolbar>
             <Link to="/">
               <Typography variant="h4">ONE.UF</Typography>
             </Link>
           </Toolbar>
         </AppBar>
-        <Container maxWidth="lg" style={{ marginTop: "1em" }}>
+        <Box style={{ marginTop: "0.5em" }}>
           <Switch>
             <Route exact path="/" children={<Schedule />} />
           </Switch>
           <Switch>
             <Route exact path="/signup" children={<Signup />} />
           </Switch>
-        </Container>
+        </Box>
       </ConnectedRouter>
     </Box>
   );
