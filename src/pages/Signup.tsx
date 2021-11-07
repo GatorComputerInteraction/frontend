@@ -1,26 +1,20 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card,
   Grid,
   Paper,
   Typography,
-  CardContent,
-  Collapse,
   IconButton,
   IconButtonProps,
-  FormControl,
-  InputLabel,
-  Input,
   Button,
   AccordionSummary,
   AccordionDetails,
-  Box,
   TableContainer,
   TableRow,
   TableCell,
   Table,
   Chip,
   TextField,
+  Box,
 } from "@material-ui/core";
 import MuiAccordion from "@material-ui/core/Accordion";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -286,24 +280,41 @@ export default () => {
     return (
       <Accordion id={"course" + course.instanceId} className="course-card">
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography className="course-header" style={{ marginRight: "auto" }}>
-            {mapCourseIdToName(course.courseId)}
-          </Typography>
-          <Grid container justifyContent="flex-end">
-            {IndicatorIcons(course.instanceId, course.courseId)}
-            <Grid item xs={2}>
-              <Button
-                className="add-button"
-                color="primary"
-                variant="contained"
-                aria-label="outlined primary button"
-                onClick={() => addCourse(course.instanceId)}
-                disabled={courseIsDuplicate(course.instanceId)}
-                size="small"
+          <Grid container>
+            <Grid item xs={12} style={{ display: "flex" }}>
+              <Typography
+                className="course-header"
+                style={{ marginRight: "auto" }}
               >
-                <AddIcon />
-                Add Course
-              </Button>
+                {mapCourseIdToName(course.courseId)}
+              </Typography>
+              <Grid container justifyContent="flex-end">
+                {IndicatorIcons(course.instanceId, course.courseId)}
+                <Grid item xs={2}>
+                  <Button
+                    className="add-button"
+                    color="primary"
+                    variant="contained"
+                    aria-label="outlined primary button"
+                    onClick={() => addCourse(course.instanceId)}
+                    disabled={courseIsDuplicate(course.instanceId)}
+                    size="small"
+                  >
+                    <AddIcon />
+                    Add Course
+                  </Button>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="caption">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
+                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+                nulla pariatur.
+              </Typography>
             </Grid>
           </Grid>
         </AccordionSummary>
@@ -380,11 +391,11 @@ export default () => {
     <Grid container spacing={2}>
       <Grid
         item
-        xs={3}
+        xs={2}
         style={{
           backgroundColor: "white",
-          paddingLeft: "1em",
-          paddingRight: "1em",
+          paddingLeft: "1.5em",
+          paddingRight: "1.5em",
           height: "100vh",
         }}
       >
@@ -415,7 +426,7 @@ export default () => {
           onChange={handleYearChange}
         />
       </Grid>
-      <Grid item xs={9} style={{ padding: "1em" }}>
+      <Grid item xs={10} style={{ padding: "1em" }}>
         <Typography
           variant="h3"
           style={{ fontWeight: 200, marginBottom: "0.25em" }}
