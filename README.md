@@ -47,6 +47,10 @@ This project uses a custom [webpack](https://webpack.js.org/) configuration for 
 
 `src/components` should contain all app-specific components.
 
+`src/services` contains all services for communicating with the backend.
+
+`src/types` contains all data models.
+
 # Learning for this Project
 
 Here's some good resources to work through if you're brand new to React and the greater modern Javascript ecosystem, or need a resource on a certain part of the project.
