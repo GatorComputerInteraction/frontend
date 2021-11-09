@@ -69,3 +69,7 @@
 .star {
   color: rgb(245, 208, 0);
 }
+
+.TextField {
+  padding: 16px 14px;
+}

@@ -3,8 +3,6 @@ import {
   Grid,
   Paper,
   Typography,
-  IconButton,
-  IconButtonProps,
   Button,
   AccordionSummary,
   AccordionDetails,
@@ -14,7 +12,11 @@ import {
   Table,
   Chip,
   TextField,
-  Box,
+  FormControl,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormHelperText,
 } from "@material-ui/core";
 import MuiAccordion from "@material-ui/core/Accordion";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -23,7 +25,7 @@ import CheckIcon from "@material-ui/icons/Check";
 import StarIcon from "@material-ui/icons/Star";
 import RoomIcon from "@material-ui/icons/Room";
 import SearchIcon from "@material-ui/icons/Search";
-import { styled, withStyles } from "@material-ui/styles";
+import { withStyles } from "@material-ui/styles";
 
 import StudentService from "../services/StudentService";
 import CourseService from "../services/CourseService";
@@ -41,24 +43,35 @@ import {
   IStudentSchedule,
   IDegreeCourse,
 } from "./../types/Types";
-
 import "./Signup.css";
-
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
 
 export default () => {
   // states for interface options
   const studentId = 10001000;
-  const [semester, setSemester] = React.useState("Spring");
+  const [semester, setSemester] = React.useState("Fall");
   const [year, setYear] = React.useState(2021);
-  const handleSemesterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSemester(event.target.value);
+  const [course, setCourse] = React.useState("");
+  const [classNumber, setClassNumber] = React.useState("");
+  const handleSemesterChange = (
+    event: React.ChangeEvent<{ value: unknown }>
+  ) => {
+    setSemester(String(event.target.value));
   };
-  const handleYearChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setYear(parseInt(event.target.value));
+  const handleYearChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setYear(parseInt(String(event.target.value)));
   };
+  const handleCourseChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setCourse(String(event.target.value));
+  };
+  const handleClassNumberChange = (
+    event: React.ChangeEvent<{ value: unknown }>
+  ) => {
+    setClassNumber(String(event.target.value));
+  };
+
+  // default options values
+  const defaultProgramLevel = "Undergraduate";
+  const defaultDepartment = "Computer & Information Science & Engineering";
 
   // states for backend loaded data
   const initialStudentState = {
@@ -81,17 +94,6 @@ export default () => {
   >([]);
   const [timeslots, setTimeslots] = useState<Array<ITimeslot>>([]);
 
-  // dictionary of open cards
-  const [expandedDict, setExpandedDict] = React.useState<{
-    [key: number]: boolean;
-  }>({});
-  const handleExpandClick = (id: number) => {
-    setExpandedDict((expandedDict) => ({
-      ...expandedDict,
-      [id]: !expandedDict[id],
-    }));
-  };
-
   useEffect(() => {
     getStudent();
     getCourses();
@@ -99,12 +101,7 @@ export default () => {
     getRequirementType();
     getStudentSchedule();
     getTimeSlots();
-    updateExpandedDict();
   }, []);
-
-  useEffect(() => {
-    getStudentDegree();
-  }, [student]);
 
   const getStudent = () => {
     StudentService.getById(studentId)
@@ -120,7 +117,24 @@ export default () => {
   const getCourseInstances = () => {
     CourseInstanceService.getBySemesterYear(year, semester)
       .then((response) => {
-        setCourseInstances(response.data);
+        var data = response.data;
+        if (course != "") {
+          var data = data.filter((x) => {
+            var c = courses
+              .find((y) => y.courseId == x.courseId)
+              ?.courseName.toLowerCase();
+            return c.startsWith(course) || c == course;
+          });
+        }
+        if (classNumber != "") {
+          var data = courseInstances.filter(
+            (x) =>
+              x.instanceId.toString().toLowerCase().startsWith(classNumber) ||
+              x.instanceId == parseInt(classNumber)
+          );
+        }
+
+        setCourseInstances(data);
         console.log(response.data);
       })
       .catch((e) => {
@@ -152,6 +166,7 @@ export default () => {
   const getStudentSchedule = () => {
     StudentScheduleService.getByUfId(studentId)
       .then((response) => {
+        console.log(response.data);
         setStudentSchedule(response.data);
       })
       .catch((e) => {
@@ -177,12 +192,6 @@ export default () => {
       .catch((e) => {
         console.log(e);
       });
-  };
-
-  const updateExpandedDict = () => {
-    courseInstances.forEach(
-      (course) => (expandedDict[course.instanceId] = false)
-    );
   };
 
   const addCourse = (id: number) => {
@@ -219,16 +228,12 @@ export default () => {
     return formattedStr;
   };
 
-  const ExpandMore = styled((props: ExpandMoreProps) => {
-    const { expand, ...other } = props;
-    return <IconButton {...other} className="dropdown-button" />;
-  })(({ theme, expand }) => ({
-    transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
-    marginLeft: "auto",
-  }));
+  const mapCourseToRequirements = (id: number) => {
+    return studentDegree.filter((record) => record.courseId == id);
+  };
 
-  const shouldExpand = (i: number) => {
-    return i in expandedDict ? expandedDict[i] : false;
+  const mapRequirementToName = (type: number) => {
+    return requirementType.find((req) => req.requirementType == type)?.name;
   };
 
   const courseIsDuplicate = (id: number) => {
@@ -244,9 +249,6 @@ export default () => {
   const IndicatorIcons = (instanceId: number, courseId: number) => {
     return (
       <Grid item xs={2}>
-        {courseIsDuplicate(instanceId) ? (
-          <Chip variant="outlined" icon={<CheckIcon />} label="Scheduled" />
-        ) : null}
         {courseIsRequired(courseId) ? (
           <Chip
             color="primary"
@@ -254,7 +256,10 @@ export default () => {
             icon={<StarIcon />}
             label="Required"
           />
-        ) : null}
+        ) : undefined}
+        {courseIsDuplicate(instanceId) ? (
+          <Chip variant="outlined" icon={<CheckIcon />} label="Scheduled" />
+        ) : undefined}
       </Grid>
     );
   };
@@ -290,20 +295,6 @@ export default () => {
               </Typography>
               <Grid container justifyContent="flex-end">
                 {IndicatorIcons(course.instanceId, course.courseId)}
-                <Grid item xs={2}>
-                  <Button
-                    className="add-button"
-                    color="primary"
-                    variant="contained"
-                    aria-label="outlined primary button"
-                    onClick={() => addCourse(course.instanceId)}
-                    disabled={courseIsDuplicate(course.instanceId)}
-                    size="small"
-                  >
-                    <AddIcon />
-                    Add Course
-                  </Button>
-                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={12}>
@@ -320,7 +311,23 @@ export default () => {
         </AccordionSummary>
         <AccordionDetails>
           <Paper style={{ width: "100%", height: "auto", padding: "1em" }}>
-            <Typography>Class #{course.instanceId}</Typography>
+            <div style={{ display: "flow-root" }}>
+              <Typography style={{ float: "left", lineHeight: "32px" }}>
+                Class #{course.instanceId}
+              </Typography>
+              <Button
+                className="add-button"
+                color="primary"
+                variant="contained"
+                aria-label="outlined primary button"
+                onClick={() => addCourse(course.instanceId)}
+                disabled={courseIsDuplicate(course.instanceId)}
+                size="small"
+              >
+                <AddIcon />
+                Add Course
+              </Button>
+            </div>
             <hr style={{ color: "#eee" }} />
             <Grid container spacing={3}>
               <Grid item xs={2}>
@@ -348,7 +355,22 @@ export default () => {
                   borderWidth: "2px",
                 }}
               >
-                Degree Information Here
+                <TableRow>
+                  <Typography variant="subtitle2">
+                    Fulfilled Degree Requirements
+                  </Typography>
+                </TableRow>
+                <TableRow>
+                  <Typography variant="body2">
+                    <ul>
+                      {mapCourseToRequirements(course.courseId)?.map(
+                        (req: IDegreeCourse) => (
+                          <li>{mapRequirementToName(req.requirementType)}</li>
+                        )
+                      )}
+                    </ul>
+                  </Typography>
+                </TableRow>
               </Grid>
               <Grid item xs={5}>
                 <TableContainer>
@@ -407,24 +429,134 @@ export default () => {
         >
           <SearchIcon /> Required
         </Typography>
-        <TextField
+        <Grid style={{ marginTop: "15px" }}>
+          <FormControl fullWidth>
+            <InputLabel
+              id="semester-input-label"
+              variant="outlined"
+              margin="dense"
+            >
+              Semester
+            </InputLabel>
+            <Select
+              labelId="semester-input-label"
+              id="semester-input"
+              variant="outlined"
+              value={semester}
+              label="Semester"
+              onChange={handleSemesterChange}
+            >
+              <MenuItem value={"Fall"}>Fall</MenuItem>
+              <MenuItem value={"Spring"}>Spring</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth disabled style={{ marginTop: "15px" }}>
+            <InputLabel id="year-input-label" variant="outlined" margin="dense">
+              Year
+            </InputLabel>
+            <Select
+              labelId="year-input-label"
+              id="year-input"
+              variant="outlined"
+              value={year}
+              label="Year"
+              onChange={handleYearChange}
+            >
+              <MenuItem value={2020}>2020</MenuItem>
+              <MenuItem value={2021}>2021</MenuItem>
+              <MenuItem value={2022}>2022</MenuItem>
+            </Select>
+            <FormHelperText>Disabled</FormHelperText>
+          </FormControl>
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Course"
+            variant="outlined"
+            id="course-input"
+            helperText="Ex: COP3502"
+            value={course}
+            onChange={handleCourseChange}
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Class Number"
+            variant="outlined"
+            id="classNumber-input"
+            helperText="Ex: 12345"
+            value={classNumber}
+            onChange={handleClassNumberChange}
+          />
+          <TextField
+            fullWidth
+            disabled
+            margin="dense"
+            label="Course Title"
+            variant="outlined"
+            id="course-title-input"
+            helperText="Part or all of Title or Keyword"
+          />
+          <TextField
+            fullWidth
+            disabled
+            margin="dense"
+            label="Instructor"
+            variant="outlined"
+            id="instructor-input"
+            helperText="Instructor Last Name"
+          />
+        </Grid>
+        <FormControl fullWidth disabled style={{ marginTop: "15px" }}>
+          <InputLabel
+            id="program-level-input-label"
+            variant="outlined"
+            margin="dense"
+          >
+            Program Level
+          </InputLabel>
+          <Select
+            labelId="program-level-input-label"
+            id="program-level-input"
+            variant="outlined"
+            value={defaultProgramLevel}
+            label="Program Level"
+          >
+            <MenuItem value={"Undergraduate"}>Undergraduate</MenuItem>
+          </Select>
+          <FormHelperText>Disabled</FormHelperText>
+        </FormControl>
+        <FormControl fullWidth disabled style={{ marginTop: "15px" }}>
+          <InputLabel
+            id="department-input-label"
+            variant="outlined"
+            margin="dense"
+          >
+            Departments
+          </InputLabel>
+          <Select
+            labelId="department-input-label"
+            id="department-input"
+            variant="outlined"
+            value={defaultDepartment}
+            label="Departments"
+          >
+            <MenuItem value={"Computer & Information Science & Engineering"}>
+              Computer & Information Science & Engineering
+            </MenuItem>
+          </Select>
+          <FormHelperText>Disabled</FormHelperText>
+        </FormControl>
+        <Button
+          aria-label="Search"
+          variant="contained"
+          color="primary"
           fullWidth
-          margin="normal"
-          label="Term"
-          variant="outlined"
-          id="semester-input"
-          value={semester}
-          onChange={handleSemesterChange}
-        />
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Year"
-          variant="outlined"
-          id="year-input"
-          value={year}
-          onChange={handleYearChange}
-        />
+          style={{ bottom: 0 }}
+          onClick={() => getCourseInstances()}
+        >
+          Search
+        </Button>
       </Grid>
       <Grid item xs={10} style={{ padding: "1em" }}>
         <Typography
@@ -440,7 +572,9 @@ export default () => {
           {courseInstances.length > 0 ? (
             courseInstances.map((course) => courseInstanceComponent(course))
           ) : (
-            <Typography>There are no courses available.</Typography>
+            <Typography style={{ padding: "1em" }}>
+              There are no courses available.
+            </Typography>
           )}
         </Paper>
       </Grid>
