@@ -103,6 +103,10 @@ export default () => {
     getTimeSlots();
   }, []);
 
+  useEffect(() => {
+    getStudentDegree();
+  }, [student]);
+
   const getStudent = () => {
     StudentService.getById(studentId)
       .then((response) => {
@@ -123,18 +127,25 @@ export default () => {
             var c = courses
               .find((y) => y.courseId == x.courseId)
               ?.courseName.toLowerCase();
-            return c.startsWith(course) || c == course;
+            return (
+              c &&
+              (c.startsWith(course.toLowerCase()) || c == course.toLowerCase())
+            );
           });
         }
         if (classNumber != "") {
           var data = courseInstances.filter(
             (x) =>
-              x.instanceId.toString().toLowerCase().startsWith(classNumber) ||
+              x.instanceId
+                .toString()
+                .toLowerCase()
+                .startsWith(classNumber.toLowerCase()) ||
               x.instanceId == parseInt(classNumber)
           );
         }
-
         setCourseInstances(data);
+        setCourse("");
+        setClassNumber("");
         console.log(response.data);
       })
       .catch((e) => {
