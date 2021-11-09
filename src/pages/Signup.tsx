@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card,
   Grid,
   Paper,
   Typography,
-  CardContent,
-  Collapse,
   IconButton,
   IconButtonProps,
-  FormControl,
-  InputLabel,
-  Input,
   Button,
+  AccordionSummary,
+  AccordionDetails,
+  TableContainer,
+  TableRow,
+  TableCell,
+  Table,
+  Chip,
+  TextField,
+  Box,
 } from "@material-ui/core";
+import MuiAccordion from "@material-ui/core/Accordion";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 import CheckIcon from "@material-ui/icons/Check";
 import StarIcon from "@material-ui/icons/Star";
-import { styled } from "@material-ui/styles";
+import RoomIcon from "@material-ui/icons/Room";
+import SearchIcon from "@material-ui/icons/Search";
+import { styled, withStyles } from "@material-ui/styles";
 
 import StudentService from "../services/StudentService";
 import CourseService from "../services/CourseService";
@@ -237,111 +243,207 @@ export default () => {
 
   const IndicatorIcons = (instanceId: number, courseId: number) => {
     return (
-      <div className="indicator-icons">
+      <Grid item xs={2}>
         {courseIsDuplicate(instanceId) ? (
-          <div className="indicator">
-            <CheckIcon className="indicator-icon checkmark" />
-            <p className="sub-text">Scheduled</p>
-          </div>
-        ) : (
-          ""
-        )}
+          <Chip variant="outlined" icon={<CheckIcon />} label="Scheduled" />
+        ) : null}
         {courseIsRequired(courseId) ? (
-          <div className="indicator">
-            <StarIcon className="indicator-icon star" />
-            <p className="sub-text">Required</p>
-          </div>
-        ) : (
-          ""
-        )}
-      </div>
+          <Chip
+            color="primary"
+            variant="outlined"
+            icon={<StarIcon />}
+            label="Required"
+          />
+        ) : null}
+      </Grid>
     );
   };
 
-  var courseInstanceComponent = (course: ICourseInstance) => {
+  const Accordion = withStyles({
+    root: {
+      border: "1px solid rgba(0, 0, 0, .125)",
+      boxShadow: "none",
+      "&:not(:last-child)": {
+        borderBottom: 0,
+      },
+      "&:before": {
+        display: "none",
+      },
+      "&$expanded": {
+        margin: "auto",
+      },
+    },
+    expanded: {},
+  })(MuiAccordion);
+
+  const courseInstanceComponent = (course: ICourseInstance) => {
     return (
-      <Card id={"course" + course.instanceId} className="course-card">
-        <CardContent>
-          <Typography className="course-header">
-            {mapCourseIdToName(course.courseId)}
-            <ExpandMore
-              expand={shouldExpand(course.instanceId)}
-              onClick={() => handleExpandClick(course.instanceId)}
-              aria-expanded={shouldExpand(course.instanceId)}
-              aria-label="show more"
-            >
-              <ExpandMoreIcon />
-            </ExpandMore>
-            {IndicatorIcons(course.instanceId, course.courseId)}
-          </Typography>
-          <Collapse
-            in={shouldExpand(course.instanceId)}
-            timeout="auto"
-            unmountOnExit
-          >
-            <CardContent className="course-details outlined">
-              <div className="text">
-                <Typography>Class Number: #{course.instanceId}</Typography>
+      <Accordion id={"course" + course.instanceId} className="course-card">
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Grid container>
+            <Grid item xs={12} style={{ display: "flex" }}>
+              <Typography
+                className="course-header"
+                style={{ marginRight: "auto" }}
+              >
+                {mapCourseIdToName(course.courseId)}
+              </Typography>
+              <Grid container justifyContent="flex-end">
+                {IndicatorIcons(course.instanceId, course.courseId)}
+                <Grid item xs={2}>
+                  <Button
+                    className="add-button"
+                    color="primary"
+                    variant="contained"
+                    aria-label="outlined primary button"
+                    onClick={() => addCourse(course.instanceId)}
+                    disabled={courseIsDuplicate(course.instanceId)}
+                    size="small"
+                  >
+                    <AddIcon />
+                    Add Course
+                  </Button>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="caption">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
+                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+                nulla pariatur.
+              </Typography>
+            </Grid>
+          </Grid>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Paper style={{ width: "100%", height: "auto", padding: "1em" }}>
+            <Typography>Class #{course.instanceId}</Typography>
+            <hr style={{ color: "#eee" }} />
+            <Grid container spacing={3}>
+              <Grid item xs={2}>
                 <Typography>
-                  Class Times: {mapSlotIdToDay(course.slotId)} Period{" "}
+                  {mapSlotIdToDay(course.slotId)} | Period{" "}
                   {mapSlotIdToPeriods(course.slotId)}
                 </Typography>
-                <Typography>
-                  Credits: {mapCourseIdToCredits(course.courseId)}
+                <Typography
+                  style={{
+                    color: "#285797",
+                    display: "flex",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <RoomIcon /> TBD
                 </Typography>
-              </div>
-              <Button
-                className="add-button"
-                color="primary"
-                aria-label="outlined primary button"
-                onClick={() => addCourse(course.instanceId)}
-                disabled={courseIsDuplicate(course.instanceId)}
-                size="small"
+              </Grid>
+              <Grid
+                item
+                xs={5}
+                style={{
+                  borderStyle: "solid",
+                  borderColor: "transparent #eee transparent #eee",
+                  borderWidth: "2px",
+                }}
               >
-                <AddIcon />
-                Add Course
-              </Button>
-            </CardContent>
-          </Collapse>
-        </CardContent>
-      </Card>
+                Degree Information Here
+              </Grid>
+              <Grid item xs={5}>
+                <TableContainer>
+                  <Table>
+                    <TableRow>
+                      <TableCell variant="footer">Instructor</TableCell>
+                      <TableCell>TBD</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell variant="footer">Meet</TableCell>
+                      <TableCell>Primarily Classroom</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell variant="footer">Credits</TableCell>
+                      <TableCell>
+                        {mapCourseIdToCredits(course.courseId)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell variant="footer">Deparment</TableCell>
+                      <TableCell>
+                        Computer & Information Science & Engineering
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell variant="footer">Final Exam</TableCell>
+                      <TableCell>TBD</TableCell>
+                    </TableRow>
+                  </Table>
+                </TableContainer>
+              </Grid>
+            </Grid>
+          </Paper>
+        </AccordionDetails>
+      </Accordion>
     );
   };
 
   return (
-    <>
-      <Paper>
-        <Grid container spacing={2}>
-          <Grid item xs={12} style={{ padding: "1em" }}>
-            <Typography variant="h3">Course of Schedules</Typography>
-          </Grid>
-          <Grid item xs={4} style={{ padding: "2em" }}>
-            <Typography variant="h5">Options</Typography>
-            <FormControl variant="standard">
-              <InputLabel htmlFor="semester-input">Semester</InputLabel>
-              <Input
-                id="semester-input"
-                value={semester}
-                onChange={handleSemesterChange}
-              />
-            </FormControl>
-            <FormControl variant="standard">
-              <InputLabel htmlFor="year-input">Year</InputLabel>
-              <Input id="year-input" value={year} onChange={handleYearChange} />
-            </FormControl>
-          </Grid>
-          <Grid item xs={8} style={{ padding: "2em" }}>
-            <Typography variant="h5">Courses</Typography>
-            <div id="coursesParent" className="courses-parent outlined">
-              {courseInstances.length > 0 ? (
-                courseInstances.map((course) => courseInstanceComponent(course))
-              ) : (
-                <Typography>There are no courses available.</Typography>
-              )}
-            </div>
-          </Grid>
-        </Grid>
-      </Paper>
-    </>
+    <Grid container spacing={2}>
+      <Grid
+        item
+        xs={2}
+        style={{
+          backgroundColor: "white",
+          paddingLeft: "1.5em",
+          paddingRight: "1.5em",
+          height: "100vh",
+        }}
+      >
+        <Typography variant="h4" style={{ marginBottom: "0.25em" }}>
+          Course Search
+        </Typography>
+        <Typography
+          style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}
+        >
+          <SearchIcon /> Required
+        </Typography>
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Term"
+          variant="outlined"
+          id="semester-input"
+          value={semester}
+          onChange={handleSemesterChange}
+        />
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Year"
+          variant="outlined"
+          id="year-input"
+          value={year}
+          onChange={handleYearChange}
+        />
+      </Grid>
+      <Grid item xs={10} style={{ padding: "1em" }}>
+        <Typography
+          variant="h3"
+          style={{ fontWeight: 200, marginBottom: "0.25em" }}
+        >
+          Schedule of Courses
+        </Typography>
+        <Paper>
+          <Typography style={{ padding: "1em" }}>
+            {courseInstances.length} results
+          </Typography>
+          {courseInstances.length > 0 ? (
+            courseInstances.map((course) => courseInstanceComponent(course))
+          ) : (
+            <Typography>There are no courses available.</Typography>
+          )}
+        </Paper>
+      </Grid>
+    </Grid>
   );
 };

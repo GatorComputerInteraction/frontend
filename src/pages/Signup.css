@@ -50,6 +50,7 @@
 
 .indicator {
   display: flex;
+  float: right;
 }
 
 .indicator-icon {
