@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { connectRouter } from "connected-react-router";
 import { createBrowserHistory } from "history";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import counterReducer from "./features/example";
+import studentReducer from "./features/student";
 
 // Create browser history reducer (connected-react-router)
 export const browserHistory = createBrowserHistory();
@@ -10,7 +10,7 @@ export const browserHistory = createBrowserHistory();
 // Build state
 export const store = configureStore({
   reducer: {
-    example: counterReducer,
+    student: studentReducer,
     router: connectRouter(browserHistory),
   },
 });

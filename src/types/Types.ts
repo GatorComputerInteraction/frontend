@@ -43,6 +43,27 @@ interface IDegreeCourse {
   requirementType: number;
 }
 
+export interface StudentClass {
+  courseId: number;
+  classId: number;
+  courseName: string;
+  credits: number;
+  semester: string;
+  year: number;
+  day: string;
+  periods: number[];
+}
+
+export interface IStudentCompletedCourse {
+  ufId: number;
+  courseId: number;
+}
+
+export interface IDegree {
+  degreeId: number;
+  degreeName: string;
+}
+
 export type {
   IStudent,
   ICourse,
