@@ -11,17 +11,6 @@ interface ICourse {
   credits: number;
 }
 
-interface ICompletedCourses {
-  ufId: number;
-  courseId: number;
-}
-
-interface IDegreeCourse {
-  degreeId: number;
-  courseId: number;
-  requirementType: number;
-}
-
 interface ICourseInstance {
   instanceId: number;
   semester: string;
@@ -48,7 +37,29 @@ interface IStudentSchedule {
   instanceId: number;
 }
 
-interface IDegree {
+interface IDegreeCourse {
+  degreeId: number;
+  courseId: number;
+  requirementType: number;
+}
+
+export interface StudentClass {
+  courseId: number;
+  classId: number;
+  courseName: string;
+  credits: number;
+  semester: string;
+  year: number;
+  day: string;
+  periods: number[];
+}
+
+export interface IStudentCompletedCourse {
+  ufId: number;
+  courseId: number;
+}
+
+export interface IDegree {
   degreeId: number;
   degreeName: string;
 }
@@ -60,7 +71,5 @@ export type {
   IRequirementType,
   ITimeslot,
   IStudentSchedule,
-  ICompletedCourses,
-  IDegree,
   IDegreeCourse,
 };
