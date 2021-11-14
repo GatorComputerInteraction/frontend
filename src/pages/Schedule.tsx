@@ -34,7 +34,7 @@ import DegreeService from "../services/DegreeService";
 
 const getStudentSchedule = async (
   studentId: number
-): Promise<StudentClass[]> => {
+): Promise<[StudentClass[], StudentClass[]]> => {
   const res = await StudentScheduleService.getByUfId(studentId);
   const classes = res.data;
   const instanceIds = classes.map((classObj) => classObj.instanceId);
@@ -68,13 +68,35 @@ const getStudentSchedule = async (
     };
   });
 
-  return studentClasses;
+  const allClasses: StudentClass[] = courseInstances.map((inst) => {
+    const course = courses.find((course) => course.courseId == inst.courseId);
+    const timeslot = timeslots.find(
+      (timeslot) => (inst.slotId = timeslot.slotId)
+    );
+    return {
+      courseId: inst.courseId,
+      classId: inst.instanceId,
+      courseName: course!!.courseName,
+      credits: course!!.credits,
+      semester: inst.semester,
+      year: inst.year,
+      day: timeslot!!.day,
+      periods: [
+        timeslot!!.periodId1,
+        timeslot!!.periodId2,
+        timeslot!!.periodId3,
+      ],
+    };
+  });
+
+  return [allClasses, studentClasses];
 };
 
 export default () => {
   let history = useHistory();
 
   const [student, setStudent] = useState<IStudent | undefined>();
+  const [allClasses, setAllClasses] = useState<StudentClass[] | undefined>();
   const [studentSchedule, setStudentSchedule] = useState<
     StudentClass[] | undefined
   >();
@@ -120,9 +142,10 @@ export default () => {
         console.log(e);
       });
 
-    getStudentSchedule(studentId).then((classes) =>
-      setStudentSchedule(classes)
-    );
+    getStudentSchedule(studentId).then(([allClasses, classes]) => {
+      setAllClasses(allClasses);
+      setStudentSchedule(classes);
+    });
 
     StudentCompletedCourseService.getAll().then((res) => {
       const completedCourses = res.data.filter(
@@ -184,6 +207,9 @@ export default () => {
           </Grid>
           <Grid item xs={4}>
             <Sidebar
+              updateSchedule={() => window.location.reload()}
+              studentId={studentId}
+              allClasses={allClasses}
               studentClasses={studentSchedule}
               requiredCourses={requiredCourses}
               studentCompletedCourses={studentCompletedCourses}

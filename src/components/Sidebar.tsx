@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import axios from "axios";
 import { useAppSelector, useAppDispatch } from "../state";
+import SettingsIcon from "@material-ui/icons/Settings";
 import {
   ButtonGroup,
   Grid,
@@ -12,6 +13,12 @@ import {
   ListItem,
   ListItemText,
   Box,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContentText,
+  DialogContent,
+  DialogActions,
 } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
@@ -21,6 +28,8 @@ import {
   IStudentCompletedCourse,
   StudentClass,
 } from "types/Types";
+import ScheduleDialog from "./ScheduleDialog";
+import StudentScheduleService from "../services/StudentScheduleService";
 
 //styles
 const useStyles = makeStyles({
@@ -49,6 +58,9 @@ const useStyles = makeStyles({
 });
 
 interface SideBarProps {
+  updateSchedule: () => void;
+  studentId: number;
+  allClasses?: StudentClass[];
   studentClasses?: StudentClass[];
   requiredCourses?: IDegreeCourse[];
   studentCompletedCourses?: IStudentCompletedCourse[];
@@ -116,6 +128,73 @@ const getPredictedGraduation = async (
   }
 };
 
+interface CompleteScheduleRequest {
+  term: string;
+  year: number;
+  current_course_ids: number[];
+  min_credits: number;
+  max_credits: number;
+  max_classes: number;
+  exclude_ids: number[];
+}
+
+interface CompleteScheduleResponse {
+  schedule: number[];
+  additions: number[];
+}
+
+const getRecommendedSchedules = async (
+  semester: string,
+  year: number,
+  currentSchedule: StudentClass[],
+  minCredits: number,
+  maxCredits: number,
+  maxClasses: number
+): Promise<number[][]> => {
+  let results: number[][] = [];
+  let filter = [];
+  const currentCourses = currentSchedule.map((x) => x.classId);
+
+  for (let i = 0; i < 3; i++) {
+    const payload: CompleteScheduleRequest = {
+      term: "Fall",
+      year: 2021,
+      current_course_ids: currentCourses,
+      min_credits: minCredits,
+      max_credits: maxCredits,
+      max_classes: maxClasses,
+      exclude_ids: filter,
+    };
+
+    const res = await fetch(
+      "https://api.hci.realliance.net/schedule/complete",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (res.ok) {
+      let response: CompleteScheduleResponse = await res.json();
+      if (response.additions === []) {
+        return results;
+      } else if (response.schedule === currentCourses) {
+        return [];
+      }
+      results.push(response.additions);
+      filter.push(response.additions[0]);
+    } else {
+      throw res.body;
+    }
+  }
+
+  return results;
+};
+
 const buildDegreeRequirements = (
   requiredCourses: IDegreeCourse[]
 ): RequirementTable => {
@@ -131,7 +210,37 @@ const buildDegreeRequirements = (
   return table;
 };
 
+const verifyAndSetNumberFieldState = (
+  value: string,
+  setStateFunc: (param: number) => void,
+  minNumber?: number,
+  maxNumber?: number
+) => {
+  let parse = parseInt(value);
+  if (parse !== NaN) {
+    if (minNumber) {
+      parse = Math.max(minNumber, parse);
+    }
+
+    if (maxNumber) {
+      parse = Math.min(maxNumber, parse);
+    }
+    setStateFunc(parse);
+  }
+};
+
+const addCourseOptions = async (ufId: number, classes: StudentClass[]) => {
+  const promises = classes.map((classInst) =>
+    StudentScheduleService.post({ ufId: ufId, instanceId: classInst.courseId })
+  );
+
+  return Promise.all(promises);
+};
+
 export const Sidebar = ({
+  updateSchedule,
+  studentId,
+  allClasses,
   studentClasses,
   requiredCourses,
   studentCompletedCourses,
@@ -143,6 +252,14 @@ export const Sidebar = ({
     ExpectedGraduationResponse | undefined
   >();
 
+  const [minCreditField, setMinCredit] = useState<number | undefined>();
+  const [maxCreditField, setMaxCredit] = useState<number | undefined>(18);
+  const [maxClasses, setMaxClasses] = useState<number | undefined>();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [recommendedCourses, setRecommendations] = useState<
+    StudentClass[][] | undefined
+  >();
+
   const semesterToLabel: SemesterMap = {
     fall: "Fall",
     spring: "Spring",
@@ -151,6 +268,9 @@ export const Sidebar = ({
 
   useEffect(() => {
     if (studentClasses && requiredCourses && studentCompletedCourses) {
+      setMinCredit(
+        studentClasses.map((x) => x.credits).reduce((a, b) => a + b)
+      );
       const coursesTaking = studentClasses?.map((sClass) => sClass.courseId);
       const completedCourses = studentCompletedCourses?.map(
         (cClass) => cClass.courseId
@@ -172,7 +292,6 @@ export const Sidebar = ({
 
   const styles = useStyles();
 
-  console.log(studentCompletedCourses);
   const completedCoursesIds = studentCompletedCourses
     ? studentCompletedCourses.map((x) => x.courseId)
     : [];
@@ -187,7 +306,6 @@ export const Sidebar = ({
       courseIds.filter((x) => completedCoursesIds.includes(x)).length + 3;
     totalCompleted += completedCount;
     total += requirements[key]!!.length;
-    console.log(completedCoursesIds);
     return (
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={3}>
@@ -281,7 +399,123 @@ export const Sidebar = ({
       </>
     ) : null;
 
-  const scheduleAssistantContent = <></>;
+  const getSchedule = () => {
+    if (studentClasses) {
+      setOpenDialog(true);
+      setRecommendations(undefined);
+      const minPossibleCredits = studentClasses
+        .map((x) => x.credits)
+        .reduce((a, b) => a + b);
+      getRecommendedSchedules(
+        "Fall",
+        2021,
+        studentClasses,
+        minCreditField ? minCreditField : minPossibleCredits,
+        maxCreditField!!,
+        maxClasses!!
+      ).then((result) =>
+        setRecommendations(
+          result.map((optionSet: number[]) =>
+            optionSet.map(
+              (id: number) =>
+                allClasses!!.find((classInst) => classInst.courseId === id)!!
+            )
+          )
+        )
+      );
+    }
+  };
+
+  const scheduleAssistantContent = (
+    <Box style={{ padding: "0.5em", paddingLeft: "1em", paddingRight: "1em" }}>
+      <Typography variant="h5">Schedule Options</Typography>
+      <Typography
+        variant="h5"
+        style={{
+          color: "#285797",
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          marginTop: "0.75em",
+          marginBottom: "0.5em",
+        }}
+      >
+        <SettingsIcon style={{ marginRight: "0.5em" }} /> Credits
+      </Typography>
+      <Grid container spacing={4}>
+        <Grid item xs={6}>
+          <TextField
+            label="Minimum"
+            variant="outlined"
+            value={minCreditField ? minCreditField : ""}
+            onChange={(v) =>
+              verifyAndSetNumberFieldState(v.target.value, setMinCredit)
+            }
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <TextField
+            label="Maximum"
+            variant="outlined"
+            value={maxCreditField ? maxCreditField : ""}
+            onChange={(v) =>
+              verifyAndSetNumberFieldState(v.target.value, setMaxCredit)
+            }
+          />
+        </Grid>
+      </Grid>
+      <Typography
+        variant="h5"
+        style={{
+          color: "#285797",
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          marginTop: "0.75em",
+          marginBottom: "0.5em",
+        }}
+      >
+        <SettingsIcon style={{ marginRight: "0.5em" }} /> Max Courses
+      </Typography>
+      <TextField
+        label="Number"
+        variant="outlined"
+        value={maxClasses ? maxClasses : ""}
+        onChange={(v) =>
+          verifyAndSetNumberFieldState(
+            v.target.value,
+            setMaxClasses,
+            studentClasses ? studentClasses.length : undefined
+          )
+        }
+      />
+      <Typography
+        variant="h5"
+        style={{
+          color: "#285797",
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          marginTop: "0.75em",
+          marginBottom: "0.5em",
+        }}
+      >
+        <SettingsIcon style={{ marginRight: "0.5em" }} /> Preferred Instructors
+      </Typography>
+      <TextField label="Name" variant="outlined" value="N/a" disabled />
+      <Box style={{ marginTop: "3em" }}>
+        <hr color="#eee" />
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          onClick={() => getSchedule()}
+        >
+          Generate
+        </Button>
+      </Box>
+    </Box>
+  );
 
   const contentPage = onGraduationStatusPage
     ? graduationStatusContent
@@ -314,6 +548,18 @@ export const Sidebar = ({
         </ButtonGroup>
       </div>
       <Paper style={{ minHeight: "75vh" }}>{isLoading}</Paper>
+      <ScheduleDialog
+        handleClose={() => setOpenDialog(false)}
+        open={openDialog}
+        currentSchedule={studentClasses}
+        scheduleOptions={recommendedCourses}
+        onApplySchedule={(selectedOptions) =>
+          addCourseOptions(studentId, selectedOptions).then(() => {
+            setOpenDialog(false);
+            updateSchedule();
+          })
+        }
+      />
     </>
   );
 };
