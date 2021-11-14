@@ -12,10 +12,18 @@ const getByUfId = (ufId: number) => {
 const post = (data: IStudentSchedule) => {
   return http.post<IStudentSchedule>("/StudentSchedule", data);
 };
+
+const drop = (data: IStudentSchedule) => {
+  return http.delete<IStudentSchedule>(
+    `/StudentSchedule/${data.ufId}?instanceId=${data.instanceId}`
+  );
+};
+
 const StudentScheduleService = {
   getAll,
   getByUfId,
   post,
+  drop,
 };
 
 export default StudentScheduleService;

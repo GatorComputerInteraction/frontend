@@ -9,6 +9,7 @@ interface ICourse {
   courseId: number;
   courseName: string;
   credits: number;
+  friendlyName: string;
 }
 
 interface ICourseInstance {
@@ -47,6 +48,7 @@ export interface StudentClass {
   courseId: number;
   classId: number;
   courseName: string;
+  friendlyName: string;
   credits: number;
   semester: string;
   year: number;

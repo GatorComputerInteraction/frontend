@@ -231,7 +231,7 @@ const verifyAndSetNumberFieldState = (
 
 const addCourseOptions = async (ufId: number, classes: StudentClass[]) => {
   const promises = classes.map((classInst) =>
-    StudentScheduleService.post({ ufId: ufId, instanceId: classInst.courseId })
+    StudentScheduleService.post({ ufId: ufId, instanceId: classInst.classId })
   );
 
   return Promise.all(promises);
@@ -300,43 +300,45 @@ export const Sidebar = ({
     : {};
   let totalCompleted = 0;
   let total = 0;
-  const degreeRequirements = Object.keys(requirements).map((key: string) => {
-    const courseIds = requirements[key]!!.map((x) => x.courseId);
-    const completedCount =
-      courseIds.filter((x) => completedCoursesIds.includes(x)).length + 3;
-    totalCompleted += completedCount;
-    total += requirements[key]!!.length;
-    return (
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={3}>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <div style={{ position: "relative" }}>
-              <CircularProgress
-                size={45}
-                style={{ color: "#ddd", position: "absolute" }}
-                variant="determinate"
-                value={100}
-              />
-              <CircularProgress
-                size={45}
-                variant="determinate"
-                value={(completedCount / requirements[key]!!.length) * 100}
-              />
-            </div>
-          </div>
-        </Grid>
-        <Grid item xs={9}>
-          <Typography variant="h6">
-            {
-              requirementTypes!!.find(
-                (x) => x.requirementType.toString() === key
-              )?.name
-            }
-          </Typography>
-        </Grid>
-      </Grid>
-    );
-  });
+  const degreeRequirements = requirements
+    ? Object.keys(requirements).map((key: string) => {
+        const courseIds = requirements[key]!!.map((x) => x.courseId);
+        const completedCount =
+          courseIds.filter((x) => completedCoursesIds.includes(x)).length + 3;
+        totalCompleted += completedCount;
+        total += requirements[key]!!.length;
+        return (
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={3}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <div style={{ position: "relative" }}>
+                  <CircularProgress
+                    size={45}
+                    style={{ color: "#ddd", position: "absolute" }}
+                    variant="determinate"
+                    value={100}
+                  />
+                  <CircularProgress
+                    size={45}
+                    variant="determinate"
+                    value={(completedCount / requirements[key]!!.length) * 100}
+                  />
+                </div>
+              </div>
+            </Grid>
+            <Grid item xs={9}>
+              <Typography variant="h6">
+                {requirementTypes
+                  ? requirementTypes!!.find(
+                      (x) => x.requirementType.toString() === key
+                    )?.name
+                  : null}
+              </Typography>
+            </Grid>
+          </Grid>
+        );
+      })
+    : null;
 
   const loadingSpinner = (
     <div style={{ padding: "1em", display: "flex", justifyContent: "center" }}>
@@ -411,8 +413,8 @@ export const Sidebar = ({
         2021,
         studentClasses,
         minCreditField ? minCreditField : minPossibleCredits,
-        maxCreditField!!,
-        maxClasses!!
+        maxCreditField ? maxCreditField : 18,
+        maxClasses ? maxClasses : 4
       ).then((result) =>
         setRecommendations(
           result.map((optionSet: number[]) =>
@@ -554,10 +556,12 @@ export const Sidebar = ({
         currentSchedule={studentClasses}
         scheduleOptions={recommendedCourses}
         onApplySchedule={(selectedOptions) =>
-          addCourseOptions(studentId, selectedOptions).then(() => {
-            setOpenDialog(false);
-            updateSchedule();
-          })
+          addCourseOptions(studentId, selectedOptions)
+            .then(() => {
+              setOpenDialog(false);
+              updateSchedule();
+            })
+            .catch(() => updateSchedule())
         }
       />
     </>

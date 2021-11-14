@@ -34,8 +34,6 @@ export default ({
   const [optionSelected, setSelected] = useState<number>(0);
   const [prevOpenState, setPrevOpenState] = useState<boolean>(open);
 
-  console.log(scheduleOptions);
-
   const loadingSpinner = (
     <div style={{ padding: "1em", display: "flex", justifyContent: "center" }}>
       <CircularProgress />
@@ -87,7 +85,8 @@ export default ({
       ))
     : null;
 
-  const selectMenu = scheduleOptions ? (
+  const hasOptions = scheduleOptions && schedules.length > 0;
+  const selectMenu = hasOptions ? (
     <FormControl variant="outlined" style={{ marginBottom: "0.5em" }}>
       <InputLabel>Option</InputLabel>
       <Select
@@ -101,6 +100,26 @@ export default ({
     </FormControl>
   ) : null;
 
+  const buttons = hasOptions ? (
+    <DialogActions>
+      <Button onClick={handleClose} color="primary">
+        Cancel
+      </Button>
+      <Button
+        onClick={() => onApplySchedule(scheduleOptions!![optionSelected])}
+        color="primary"
+      >
+        Apply Schedule
+      </Button>
+    </DialogActions>
+  ) : (
+    <DialogActions>
+      <Button onClick={handleClose} color="primary">
+        Close
+      </Button>
+    </DialogActions>
+  );
+
   return (
     <Dialog fullWidth maxWidth="lg" open={open} onClose={handleClose}>
       <DialogTitle>Our Recommended Schedule</DialogTitle>
@@ -112,17 +131,7 @@ export default ({
         {selectMenu}
         {content}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="primary">
-          Cancel
-        </Button>
-        <Button
-          onClick={() => onApplySchedule(scheduleOptions!![optionSelected])}
-          color="primary"
-        >
-          Apply Schedule
-        </Button>
-      </DialogActions>
+      {buttons}
     </Dialog>
   );
 };

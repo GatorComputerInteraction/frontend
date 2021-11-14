@@ -15,10 +15,16 @@ import AddIcon from "@material-ui/icons/Add";
 interface ClassCardParams {
   studentClass: StudentClass;
   newCourse?: boolean;
+  selected?: boolean;
+  onClick?: () => void;
 }
 
-export default ({ studentClass, newCourse }: ClassCardParams) => {
-  console.log(studentClass);
+export default ({
+  studentClass,
+  newCourse,
+  onClick,
+  selected,
+}: ClassCardParams) => {
   const timeslots = studentClass.periods
     .filter((slot) => slot !== null)
     .join(", ");
@@ -31,7 +37,9 @@ export default ({ studentClass, newCourse }: ClassCardParams) => {
         borderLeftColor: newCourse ? "#7DA64E" : "#285797",
         borderLeftStyle: "solid",
         borderLeftWidth: "5px",
+        backgroundColor: selected ? "#EFF4FB" : "#FFFFFF",
       }}
+      onClick={onClick}
     >
       <Grid container style={{ padding: "0.5em" }}>
         <Grid item xs={6}>
@@ -43,7 +51,9 @@ export default ({ studentClass, newCourse }: ClassCardParams) => {
             }}
           >
             {newCourse ? <AddIcon /> : null}
-            <b>{studentClass.courseName}</b>
+            <b>
+              {studentClass.courseName} - {studentClass.friendlyName}
+            </b>
           </Typography>
           <Typography>Class #{studentClass.classId}</Typography>
           <br />

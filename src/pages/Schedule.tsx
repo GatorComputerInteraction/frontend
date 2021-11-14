@@ -4,16 +4,25 @@ import Button from "@material-ui/core/Button";
 import { useAppSelector, useAppDispatch } from "../state";
 import { Sidebar } from "../components/Sidebar";
 import {
+  Box,
   ButtonGroup,
   Container,
   Grid,
+  IconButton,
   Paper,
+  Table,
+  TableCell,
+  TableContainer,
+  TableRow,
   Typography,
 } from "@material-ui/core";
 
 import StudentService from "../services/StudentService";
 import StudentScheduleService from "../services/StudentScheduleService";
 import CourseInstanceService from "../services/CourseInstanceService";
+import RoomIcon from "@material-ui/icons/Room";
+import DeleteIcon from "@material-ui/icons/Delete";
+import SwapHorizIcon from "@material-ui/icons/SwapHoriz";
 import {
   ICourseInstance,
   IDegreeCourse,
@@ -31,6 +40,7 @@ import DegreeCourseService from "../services/DegreeCourseService";
 import StudentCompletedCourseService from "../services/StudentCompletedCourseService";
 import RequirementTypeService from "../services/RequirementTypeService";
 import DegreeService from "../services/DegreeService";
+import CloseIcon from "@material-ui/icons/Close";
 
 const getStudentSchedule = async (
   studentId: number
@@ -50,12 +60,13 @@ const getStudentSchedule = async (
   const studentClasses: StudentClass[] = studentClassInstances.map((inst) => {
     const course = courses.find((course) => course.courseId == inst.courseId);
     const timeslot = timeslots.find(
-      (timeslot) => (inst.slotId = timeslot.slotId)
+      (timeslot) => inst.slotId == timeslot.slotId
     );
     return {
       courseId: inst.courseId,
       classId: inst.instanceId,
       courseName: course!!.courseName,
+      friendlyName: course!!.friendlyName,
       credits: course!!.credits,
       semester: inst.semester,
       year: inst.year,
@@ -71,12 +82,13 @@ const getStudentSchedule = async (
   const allClasses: StudentClass[] = courseInstances.map((inst) => {
     const course = courses.find((course) => course.courseId == inst.courseId);
     const timeslot = timeslots.find(
-      (timeslot) => (inst.slotId = timeslot.slotId)
+      (timeslot) => inst.slotId == timeslot.slotId
     );
     return {
       courseId: inst.courseId,
       classId: inst.instanceId,
       courseName: course!!.courseName,
+      friendlyName: course!!.friendlyName,
       credits: course!!.credits,
       semester: inst.semester,
       year: inst.year,
@@ -91,6 +103,9 @@ const getStudentSchedule = async (
 
   return [allClasses, studentClasses];
 };
+
+const dropCourse = async (ufId: number, courseNumber: number) =>
+  StudentScheduleService.drop({ ufId, instanceId: courseNumber });
 
 export default () => {
   let history = useHistory();
@@ -110,6 +125,8 @@ export default () => {
     IRequirementType[] | undefined
   >();
   const [degreeName, setDegreeName] = useState<string | undefined>();
+
+  const [courseSelected, setCourseSelected] = useState<number | undefined>();
 
   // Observe the counter value
   const studentId = useAppSelector((state) => state.student.id);
@@ -159,9 +176,168 @@ export default () => {
     });
   };
 
-  const classCards = studentSchedule?.map((studentClass) => (
-    <ClassCard studentClass={studentClass} />
+  const classCards = studentSchedule?.map((studentClass, index) => (
+    <ClassCard
+      key={studentClass.classId}
+      studentClass={studentClass}
+      selected={index === courseSelected}
+      onClick={() => setCourseSelected(index)}
+    />
   ));
+
+  const courseSelectedSideBar = (studentClass: StudentClass) => {
+    const timeslots = studentClass.periods
+      .filter((slot) => slot !== null)
+      .join(", ");
+    const periodLabel = timeslots.length > 1 ? "Periods" : "Period";
+    return (
+      <Box
+        style={{
+          padding: "1em",
+          minHeight: "75vh",
+          borderLeftColor: "#eee",
+          borderLeftStyle: "solid",
+          borderLeftWidth: "1px",
+        }}
+      >
+        <Grid
+          container
+          style={{
+            borderLeftColor: "#285797",
+            borderLeftStyle: "solid",
+            borderLeftWidth: "5px",
+            padding: "1em",
+            backgroundColor: "#eee",
+            minHeight: "3em",
+          }}
+          alignItems="center"
+        >
+          <Grid item xs={10}>
+            <Typography>
+              <b>
+                {studentClass.courseName} - {studentClass.friendlyName}
+              </b>
+            </Typography>
+          </Grid>
+          <Grid item xs={2}>
+            <IconButton onClick={() => setCourseSelected(undefined)}>
+              <CloseIcon />
+            </IconButton>
+          </Grid>
+        </Grid>
+        <br />
+        <Typography variant="h6">Class #{studentClass.classId}</Typography>
+        <br />
+        <Typography>
+          {studentClass.day} | {periodLabel} {timeslots}
+        </Typography>
+        <br />
+        <Typography
+          style={{
+            color: "#285797",
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <RoomIcon /> TBD
+        </Typography>
+        <br />
+        <TableContainer>
+          <Table size="small">
+            <TableRow>
+              <TableCell
+                variant="footer"
+                style={{ borderBottomColor: "transparent" }}
+              >
+                Instructor
+              </TableCell>
+              <TableCell style={{ borderBottomColor: "transparent" }}>
+                TBD
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell
+                variant="footer"
+                style={{ borderBottomColor: "transparent" }}
+              >
+                Credits
+              </TableCell>
+              <TableCell style={{ borderBottomColor: "transparent" }}>
+                {studentClass.credits}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell
+                variant="footer"
+                style={{ borderBottomColor: "transparent" }}
+              >
+                Grading Basis
+              </TableCell>
+              <TableCell style={{ borderBottomColor: "transparent" }}>
+                Letter Grade
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell
+                variant="footer"
+                style={{ borderBottomColor: "transparent" }}
+              >
+                Final Exam
+              </TableCell>
+              <TableCell style={{ borderBottomColor: "transparent" }}>
+                TBD
+              </TableCell>
+            </TableRow>
+          </Table>
+        </TableContainer>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Button
+              fullWidth
+              variant="outlined"
+              color="primary"
+              startIcon={<DeleteIcon />}
+              onClick={() => {
+                dropCourse(studentId, studentClass.classId).then(() =>
+                  window.location.reload()
+                );
+              }}
+            >
+              Drop
+            </Button>
+          </Grid>
+          <Grid item xs={6}>
+            <Button
+              fullWidth
+              disabled
+              variant="outlined"
+              color="primary"
+              startIcon={<SwapHorizIcon />}
+            >
+              Swap
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  };
+
+  const sideBarContent =
+    studentSchedule && courseSelected !== undefined ? (
+      courseSelectedSideBar(studentSchedule!![courseSelected])
+    ) : (
+      <Sidebar
+        updateSchedule={() => window.location.reload()}
+        studentId={studentId}
+        allClasses={allClasses}
+        studentClasses={studentSchedule}
+        requiredCourses={requiredCourses}
+        studentCompletedCourses={studentCompletedCourses}
+        requirementTypes={requirementTypes}
+        degreeName={degreeName}
+      />
+    );
 
   return (
     <Container maxWidth="lg">
@@ -206,16 +382,7 @@ export default () => {
             {classCards}
           </Grid>
           <Grid item xs={4}>
-            <Sidebar
-              updateSchedule={() => window.location.reload()}
-              studentId={studentId}
-              allClasses={allClasses}
-              studentClasses={studentSchedule}
-              requiredCourses={requiredCourses}
-              studentCompletedCourses={studentCompletedCourses}
-              requirementTypes={requirementTypes}
-              degreeName={degreeName}
-            />
+            {sideBarContent}
           </Grid>
         </Grid>
       </Paper>
