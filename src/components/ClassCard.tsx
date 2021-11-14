@@ -10,12 +10,14 @@ import {
 import React from "react";
 import { StudentClass } from "../types/Types";
 import RoomIcon from "@material-ui/icons/Room";
+import AddIcon from "@material-ui/icons/Add";
 
 interface ClassCardParams {
   studentClass: StudentClass;
+  newCourse?: boolean;
 }
 
-export default ({ studentClass }: ClassCardParams) => {
+export default ({ studentClass, newCourse }: ClassCardParams) => {
   console.log(studentClass);
   const timeslots = studentClass.periods
     .filter((slot) => slot !== null)
@@ -26,14 +28,21 @@ export default ({ studentClass }: ClassCardParams) => {
     <Paper
       style={{
         marginBottom: "0.5em",
-        borderLeftColor: "#285797",
+        borderLeftColor: newCourse ? "#7DA64E" : "#285797",
         borderLeftStyle: "solid",
         borderLeftWidth: "5px",
       }}
     >
       <Grid container style={{ padding: "0.5em" }}>
         <Grid item xs={6}>
-          <Typography>
+          <Typography
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            {newCourse ? <AddIcon /> : null}
             <b>{studentClass.courseName}</b>
           </Typography>
           <Typography>Class #{studentClass.classId}</Typography>
