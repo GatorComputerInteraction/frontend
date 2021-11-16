@@ -19,6 +19,7 @@ import {
   DialogContentText,
   DialogContent,
   DialogActions,
+  FormHelperText,
 } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
@@ -505,6 +506,7 @@ export const Sidebar = ({
         <SettingsIcon style={{ marginRight: "0.5em" }} /> Preferred Instructors
       </Typography>
       <TextField label="Name" variant="outlined" value="N/a" disabled />
+      <FormHelperText>Disabled</FormHelperText>
       <Box style={{ marginTop: "3em" }}>
         <hr color="#eee" />
         <Button

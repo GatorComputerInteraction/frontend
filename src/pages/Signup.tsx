@@ -17,12 +17,14 @@ import {
   Select,
   InputLabel,
   FormHelperText,
+  CircularProgress,
 } from "@material-ui/core";
 import MuiAccordion from "@material-ui/core/Accordion";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 import CheckIcon from "@material-ui/icons/Check";
 import StarIcon from "@material-ui/icons/Star";
+import ExitIcon from "@material-ui/icons/ExitToApp";
 import RoomIcon from "@material-ui/icons/Room";
 import SearchIcon from "@material-ui/icons/Search";
 import { withStyles } from "@material-ui/styles";
@@ -439,7 +441,10 @@ export default () => {
           height: "100vh",
         }}
       >
-        <Typography variant="h4" style={{ marginBottom: "0.25em" }}>
+        <Typography
+          variant="h4"
+          style={{ marginBottom: "0.25em", marginTop: "0.5em" }}
+        >
           Course Search
         </Typography>
         <Typography
@@ -588,6 +593,8 @@ export default () => {
           </Grid>
           <Grid item xs={6}>
             <Button
+              variant="contained"
+              startIcon={<ExitIcon />}
               style={{ float: "right" }}
               color="primary"
               onClick={() => {
@@ -600,14 +607,21 @@ export default () => {
         </Grid>
         <Paper>
           <Typography style={{ padding: "1em" }}>
-            {courseInstances.length} results
+            {courseInstances.length > 0 ? courseInstances.length : "Loading"}{" "}
+            results
           </Typography>
           {courseInstances.length > 0 ? (
             courseInstances.map((course) => courseInstanceComponent(course))
           ) : (
-            <Typography style={{ padding: "1em" }}>
-              There are no courses available.
-            </Typography>
+            <div
+              style={{
+                padding: "1em",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <CircularProgress />
+            </div>
           )}
         </Paper>
       </Grid>
