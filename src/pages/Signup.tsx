@@ -26,6 +26,7 @@ import StarIcon from "@material-ui/icons/Star";
 import RoomIcon from "@material-ui/icons/Room";
 import SearchIcon from "@material-ui/icons/Search";
 import { withStyles } from "@material-ui/styles";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import StudentService from "../services/StudentService";
 import CourseService from "../services/CourseService";
@@ -88,6 +89,7 @@ export default () => {
   const [studentSchedule, setStudentSchedule] = useState<
     Array<IStudentSchedule>
   >([]);
+  const [courseInstNum, setCourseInstNum] = useState<Number>(-1);
   const [studentDegree, setStudentDegree] = useState<Array<IDegreeCourse>>([]);
   const [requirementType, setRequirementType] = useState<
     Array<IRequirementType>
@@ -122,6 +124,7 @@ export default () => {
     CourseInstanceService.getBySemesterYear(year, semester)
       .then((response) => {
         var data = response.data;
+        setCourseInstNum(response.data.length);
         if (course != "") {
           var data = data.filter((x) => {
             var c = courses
@@ -255,6 +258,25 @@ export default () => {
 
   const courseIsRequired = (id: number) => {
     return studentDegree.find((record) => record.courseId == id) !== undefined;
+  };
+
+  //loading spinner
+  const loadingSpinner = (
+    <div style={{ padding: "1em", display: "flex", justifyContent: "center" }}>
+      <CircularProgress />
+    </div>
+  );
+
+  const renderCourseInstances = () => {
+    if (courseInstances.length > 0) {
+      return courseInstances.map((course) => courseInstanceComponent(course));
+    } else {
+      return (
+        <Typography style={{ padding: "1em" }}>
+          There are no courses available.
+        </Typography>
+      );
+    }
   };
 
   const IndicatorIcons = (instanceId: number, courseId: number) => {
@@ -580,13 +602,7 @@ export default () => {
           <Typography style={{ padding: "1em" }}>
             {courseInstances.length} results
           </Typography>
-          {courseInstances.length > 0 ? (
-            courseInstances.map((course) => courseInstanceComponent(course))
-          ) : (
-            <Typography style={{ padding: "1em" }}>
-              There are no courses available.
-            </Typography>
-          )}
+          {courseInstNum == -1 ? loadingSpinner : renderCourseInstances()}
         </Paper>
       </Grid>
     </Grid>
