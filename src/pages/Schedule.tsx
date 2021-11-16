@@ -15,6 +15,7 @@ import {
   TableContainer,
   TableRow,
   Typography,
+  makeStyles,
 } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
@@ -43,6 +44,7 @@ import StudentCompletedCourseService from "../services/StudentCompletedCourseSer
 import RequirementTypeService from "../services/RequirementTypeService";
 import DegreeService from "../services/DegreeService";
 import CloseIcon from "@material-ui/icons/Close";
+import { StylesContext } from "@material-ui/styles";
 
 const getStudentSchedule = async (
   studentId: number
@@ -184,6 +186,14 @@ export default () => {
       setRequirementTypes(res.data);
     });
   };
+
+  const useStyles = makeStyles({
+    button: {
+      "&:hover": {
+        cursor: "pointer",
+      },
+    },
+  });
 
   const classCards = studentSchedule?.map((studentClass, index) => (
     <ClassCard

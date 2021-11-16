@@ -17,6 +17,7 @@ interface ClassCardParams {
   newCourse?: boolean;
   selected?: boolean;
   onClick?: () => void;
+  className?: React.CSSProperties;
 }
 
 export default ({
@@ -38,6 +39,7 @@ export default ({
         borderLeftStyle: "solid",
         borderLeftWidth: "5px",
         backgroundColor: selected ? "#EFF4FB" : "#FFFFFF",
+        cursor: "pointer",
       }}
       onClick={onClick}
     >
