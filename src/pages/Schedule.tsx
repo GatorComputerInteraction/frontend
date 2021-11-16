@@ -16,6 +16,7 @@ import {
   TableRow,
   Typography,
 } from "@material-ui/core";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import StudentService from "../services/StudentService";
 import StudentScheduleService from "../services/StudentScheduleService";
@@ -138,6 +139,13 @@ export default () => {
   useEffect(() => {
     getStudent();
   }, []);
+
+  //loading spinner
+  const loadingSpinner = (
+    <div style={{ padding: "1em", display: "flex", justifyContent: "center" }}>
+      <CircularProgress />
+    </div>
+  );
 
   const getStudent = () => {
     StudentService.getById(studentId)
@@ -396,7 +404,7 @@ export default () => {
             </Grid>
           </Grid>
           <Grid item xs={8}>
-            {classCards}
+            {studentSchedule ? classCards : loadingSpinner}
           </Grid>
           <Grid item xs={4}>
             {sideBarContent}
