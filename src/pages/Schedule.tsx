@@ -21,6 +21,7 @@ import StudentService from "../services/StudentService";
 import StudentScheduleService from "../services/StudentScheduleService";
 import CourseInstanceService from "../services/CourseInstanceService";
 import RoomIcon from "@material-ui/icons/Room";
+import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import SwapHorizIcon from "@material-ui/icons/SwapHoriz";
 import {
@@ -339,18 +340,28 @@ export default () => {
       />
     );
 
+  const credits = studentSchedule
+    ? studentSchedule.map((x) => x.credits).reduce((a, b) => a + b)
+    : 0;
+
   return (
     <Container maxWidth="lg">
+      <Typography
+        variant="h4"
+        style={{ fontWeight: 200, marginBottom: "1em", marginTop: "1em" }}
+      >
+        My Schedule - Fall 2021
+      </Typography>
       <Paper>
         <Grid container spacing={2} style={{ padding: "0.75em" }}>
           <Grid item xs={12}>
             <Grid container justifyContent="space-between">
               <Grid item xs={4}>
-                <Typography variant="h6">
+                <Typography variant="h6" style={{ fontWeight: 300 }}>
                   {student?.firstName} {student?.lastName}
                 </Typography>
                 <Typography variant="body2" color="secondary">
-                  Credits: #
+                  Credits: {studentSchedule ? credits : "-"}
                 </Typography>
               </Grid>
               <Grid item xs={4}>
@@ -358,17 +369,23 @@ export default () => {
                   variant="contained"
                   color="primary"
                   aria-label="outlined primary button group"
+                  fullWidth
                 >
                   <Button>List</Button>
-                  <Button>Week</Button>
-                  <Button>Map</Button>
+                  <Button color="secondary" disabled>
+                    Week
+                  </Button>
+                  <Button color="secondary" disabled>
+                    Map
+                  </Button>
                 </ButtonGroup>
               </Grid>
               <Grid item xs={4}>
                 <Button
                   className="addcoursebutton"
                   color="primary"
-                  aria-label="outlined primary button"
+                  variant="contained"
+                  startIcon={<AddIcon />}
                   onClick={() => {
                     history.push("/signup");
                   }}
