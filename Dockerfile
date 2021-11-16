@@ -4,7 +4,7 @@ WORKDIR /app
 
 ADD . .
 
-RUN --mount=type=cache,target=/app/node_modules yarn install && NODE_ENV=production yarn build
+RUN --mount=type=cache,target=/app/node_modules yarn install && NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production yarn build
 
 FROM docker.io/nginxinc/nginx-unprivileged:1.20-alpine
 
