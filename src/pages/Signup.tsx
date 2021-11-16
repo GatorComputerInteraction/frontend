@@ -26,7 +26,6 @@ import StarIcon from "@material-ui/icons/Star";
 import RoomIcon from "@material-ui/icons/Room";
 import SearchIcon from "@material-ui/icons/Search";
 import { withStyles } from "@material-ui/styles";
-import CircularProgress from "@material-ui/core/CircularProgress";
 
 import StudentService from "../services/StudentService";
 import CourseService from "../services/CourseService";
