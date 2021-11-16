@@ -339,6 +339,10 @@ export default () => {
       />
     );
 
+  const credits = studentSchedule
+    ? studentSchedule.map((x) => x.credits).reduce((a, b) => a + b)
+    : 0;
+
   return (
     <Container maxWidth="lg">
       <Paper>
@@ -350,7 +354,7 @@ export default () => {
                   {student?.firstName} {student?.lastName}
                 </Typography>
                 <Typography variant="body2" color="secondary">
-                  Credits: #
+                  Credits: {studentSchedule ? credits : "-"}
                 </Typography>
               </Grid>
               <Grid item xs={4}>
@@ -358,10 +362,15 @@ export default () => {
                   variant="contained"
                   color="primary"
                   aria-label="outlined primary button group"
+                  fullWidth
                 >
                   <Button>List</Button>
-                  <Button>Week</Button>
-                  <Button>Map</Button>
+                  <Button color="secondary" disabled>
+                    Week
+                  </Button>
+                  <Button color="secondary" disabled>
+                    Map
+                  </Button>
                 </ButtonGroup>
               </Grid>
               <Grid item xs={4}>

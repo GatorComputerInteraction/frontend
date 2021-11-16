@@ -27,7 +27,7 @@ export default () => {
           }}
         >
           <Toolbar>
-            <Link to="/">
+            <Link to="/" style={{ color: "white", textDecoration: "none" }}>
               <Typography variant="h4">ONE.UF</Typography>
             </Link>
           </Toolbar>

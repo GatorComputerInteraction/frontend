@@ -44,8 +44,10 @@ import {
   IDegreeCourse,
 } from "./../types/Types";
 import "./Signup.css";
+import { useHistory } from "react-router-dom";
 
 export default () => {
+  let history = useHistory();
   // states for interface options
   const studentId = 10001000;
   const [semester, setSemester] = React.useState("Fall");
@@ -254,24 +256,29 @@ export default () => {
   };
 
   const courseIsRequired = (id: number) => {
-    return studentDegree.find((record) => record.courseId == id) !== undefined;
+    return studentDegree.find((record) => record.courseId === id) !== undefined;
   };
 
   const IndicatorIcons = (instanceId: number, courseId: number) => {
     return (
-      <Grid item xs={2}>
+      <>
         {courseIsRequired(courseId) ? (
-          <Chip
-            color="primary"
-            variant="outlined"
-            icon={<StarIcon />}
-            label="Required"
-          />
-        ) : undefined}
+          <Grid item xs={2}>
+            <Chip
+              color="primary"
+              variant="outlined"
+              icon={<StarIcon />}
+              label="Required"
+            />
+          </Grid>
+        ) : null}
+
         {courseIsDuplicate(instanceId) ? (
-          <Chip variant="outlined" icon={<CheckIcon />} label="Scheduled" />
-        ) : undefined}
-      </Grid>
+          <Grid item xs={2}>
+            <Chip variant="outlined" icon={<CheckIcon />} label="Scheduled" />
+          </Grid>
+        ) : null}
+      </>
     );
   };
 
@@ -424,7 +431,7 @@ export default () => {
     <Grid container spacing={2}>
       <Grid
         item
-        xs={2}
+        xs={3}
         style={{
           backgroundColor: "white",
           paddingLeft: "1.5em",
@@ -569,13 +576,28 @@ export default () => {
           Search
         </Button>
       </Grid>
-      <Grid item xs={10} style={{ padding: "1em" }}>
-        <Typography
-          variant="h3"
-          style={{ fontWeight: 200, marginBottom: "0.25em" }}
-        >
-          Schedule of Courses
-        </Typography>
+      <Grid item xs={9} style={{ padding: "1em" }}>
+        <Grid container alignItems="center">
+          <Grid item xs={6}>
+            <Typography
+              variant="h3"
+              style={{ fontWeight: 200, marginBottom: "0.25em" }}
+            >
+              Schedule of Courses
+            </Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <Button
+              style={{ float: "right" }}
+              color="primary"
+              onClick={() => {
+                history.push("/");
+              }}
+            >
+              Return to Schedule
+            </Button>
+          </Grid>
+        </Grid>
         <Paper>
           <Typography style={{ padding: "1em" }}>
             {courseInstances.length} results
