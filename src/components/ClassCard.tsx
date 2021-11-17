@@ -17,7 +17,6 @@ interface ClassCardParams {
   newCourse?: boolean;
   selected?: boolean;
   onClick?: () => void;
-  className?: React.CSSProperties;
 }
 
 export default ({
