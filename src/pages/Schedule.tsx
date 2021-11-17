@@ -204,6 +204,21 @@ export default () => {
     />
   ));
 
+  const renderClassCards = () => {
+    if (credits == 0) {
+      return <Typography>Your classes will appear here</Typography>;
+    } else {
+      return studentSchedule?.map((studentClass, index) => (
+        <ClassCard
+          key={studentClass.classId}
+          studentClass={studentClass}
+          selected={index === courseSelected}
+          onClick={() => setCourseSelected(index)}
+        />
+      ));
+    }
+  };
+
   const courseSelectedSideBar = (studentClass: StudentClass) => {
     const timeslots = studentClass.periods
       .filter((slot) => slot !== null)
@@ -359,7 +374,7 @@ export default () => {
     );
 
   const credits = studentSchedule
-    ? studentSchedule.map((x) => x.credits).reduce((a, b) => a + b)
+    ? studentSchedule.map((x) => x.credits).reduce((a, b) => a + b, 0)
     : 0;
 
   return (
@@ -414,7 +429,7 @@ export default () => {
             </Grid>
           </Grid>
           <Grid item xs={8}>
-            {studentSchedule ? classCards : loadingSpinner}
+            {studentSchedule ? renderClassCards() : loadingSpinner}
           </Grid>
           <Grid item xs={4}>
             {sideBarContent}
