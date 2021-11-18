@@ -270,7 +270,7 @@ export const Sidebar = ({
   useEffect(() => {
     if (studentClasses && requiredCourses && studentCompletedCourses) {
       setMinCredit(
-        studentClasses.map((x) => x.credits).reduce((a, b) => a + b)
+        studentClasses.map((x) => x.credits).reduce((a, b) => a + b, 0)
       );
       const coursesTaking = studentClasses?.map((sClass) => sClass.courseId);
       const completedCourses = studentCompletedCourses?.map(
@@ -408,7 +408,7 @@ export const Sidebar = ({
       setRecommendations(undefined);
       const minPossibleCredits = studentClasses
         .map((x) => x.credits)
-        .reduce((a, b) => a + b);
+        .reduce((a, b) => a + b, 0);
       getRecommendedSchedules(
         "Fall",
         2021,

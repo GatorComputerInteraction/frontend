@@ -286,7 +286,7 @@ export default () => {
     return (
       <>
         {courseIsRequired(courseId) ? (
-          <Grid item xs={2}>
+          <Grid item xs={1}>
             <Chip
               color="primary"
               variant="outlined"
@@ -297,7 +297,7 @@ export default () => {
         ) : null}
 
         {courseIsDuplicate(instanceId) ? (
-          <Grid item xs={2}>
+          <Grid item xs={1}>
             <Chip variant="outlined" icon={<CheckIcon />} label="Scheduled" />
           </Grid>
         ) : null}
@@ -327,17 +327,18 @@ export default () => {
       <Accordion id={"course" + course.instanceId} className="course-card">
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Grid container>
-            <Grid item xs={12} style={{ display: "flex" }}>
-              <Typography
-                className="course-header"
-                style={{ marginRight: "auto" }}
-              >
-                {mapCourseIdToName(course.courseId)}
+            <Grid item xs={10}>
+              <Typography className="course-header">
+                {mapCourseIdToName(course.courseId)}{" "}
+                {courses
+                  ? `- ${
+                      courses.find((x) => x.courseId === course.courseId)
+                        ?.friendlyName
+                    }`
+                  : null}
               </Typography>
-              <Grid container justifyContent="flex-end">
-                {IndicatorIcons(course.instanceId, course.courseId)}
-              </Grid>
             </Grid>
+            {IndicatorIcons(course.instanceId, course.courseId)}
             <Grid item xs={12}>
               <Typography variant="caption">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do

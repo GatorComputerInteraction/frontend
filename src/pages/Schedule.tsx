@@ -341,7 +341,7 @@ export default () => {
     );
 
   const credits = studentSchedule
-    ? studentSchedule.map((x) => x.credits).reduce((a, b) => a + b)
+    ? studentSchedule.map((x) => x.credits).reduce((a, b) => a + b, 0)
     : 0;
 
   return (
