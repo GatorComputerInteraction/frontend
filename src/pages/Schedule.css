@@ -1,3 +1,7 @@
 .addcoursebutton {
   float: right;
 }
+
+.courseButton {
+  cursor: pointer;
+}

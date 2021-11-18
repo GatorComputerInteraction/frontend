@@ -24,7 +24,6 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 import CheckIcon from "@material-ui/icons/Check";
 import StarIcon from "@material-ui/icons/Star";
-import ExitIcon from "@material-ui/icons/ExitToApp";
 import RoomIcon from "@material-ui/icons/Room";
 import SearchIcon from "@material-ui/icons/Search";
 import { withStyles } from "@material-ui/styles";
@@ -46,10 +45,8 @@ import {
   IDegreeCourse,
 } from "./../types/Types";
 import "./Signup.css";
-import { useHistory } from "react-router-dom";
 
 export default () => {
-  let history = useHistory();
   // states for interface options
   const studentId = 10001000;
   const [semester, setSemester] = React.useState("Fall");
@@ -260,7 +257,7 @@ export default () => {
   };
 
   const courseIsRequired = (id: number) => {
-    return studentDegree.find((record) => record.courseId === id) !== undefined;
+    return studentDegree.find((record) => record.courseId == id) !== undefined;
   };
 
   //loading spinner
@@ -284,7 +281,7 @@ export default () => {
 
   const IndicatorIcons = (instanceId: number, courseId: number) => {
     return (
-      <>
+      <Grid item xs={2}>
         {courseIsRequired(courseId) ? (
           <Grid item xs={1}>
             <Chip
@@ -301,7 +298,7 @@ export default () => {
             <Chip variant="outlined" icon={<CheckIcon />} label="Scheduled" />
           </Grid>
         ) : null}
-      </>
+      </Grid>
     );
   };
 
@@ -455,7 +452,7 @@ export default () => {
     <Grid container spacing={2}>
       <Grid
         item
-        xs={3}
+        xs={2}
         style={{
           backgroundColor: "white",
           paddingLeft: "1.5em",
@@ -463,10 +460,7 @@ export default () => {
           height: "100vh",
         }}
       >
-        <Typography
-          variant="h4"
-          style={{ marginBottom: "0.25em", marginTop: "0.5em" }}
-        >
+        <Typography variant="h4" style={{ marginBottom: "0.25em" }}>
           Course Search
         </Typography>
         <Typography
@@ -603,34 +597,16 @@ export default () => {
           Search
         </Button>
       </Grid>
-      <Grid item xs={9} style={{ padding: "1em" }}>
-        <Grid container alignItems="center">
-          <Grid item xs={6}>
-            <Typography
-              variant="h3"
-              style={{ fontWeight: 200, marginBottom: "0.25em" }}
-            >
-              Schedule of Courses
-            </Typography>
-          </Grid>
-          <Grid item xs={6}>
-            <Button
-              variant="contained"
-              startIcon={<ExitIcon />}
-              style={{ float: "right" }}
-              color="primary"
-              onClick={() => {
-                history.push("/");
-              }}
-            >
-              Return to Schedule
-            </Button>
-          </Grid>
-        </Grid>
+      <Grid item xs={10} style={{ padding: "1em" }}>
+        <Typography
+          variant="h3"
+          style={{ fontWeight: 200, marginBottom: "0.25em" }}
+        >
+          Schedule of Courses
+        </Typography>
         <Paper>
           <Typography style={{ padding: "1em" }}>
-            {courseInstances.length > 0 ? courseInstances.length : "Loading"}{" "}
-            results
+            {courseInstances.length} results
           </Typography>
           {courseInstNum == -1 ? loadingSpinner : renderCourseInstances()}
         </Paper>
