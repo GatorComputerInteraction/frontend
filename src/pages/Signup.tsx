@@ -25,6 +25,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CheckIcon from "@material-ui/icons/Check";
 import StarIcon from "@material-ui/icons/Star";
 import RoomIcon from "@material-ui/icons/Room";
+import ExitIcon from "@material-ui/icons/ExitToApp";
 import SearchIcon from "@material-ui/icons/Search";
 import { withStyles } from "@material-ui/styles";
 
@@ -45,8 +46,11 @@ import {
   IDegreeCourse,
 } from "./../types/Types";
 import "./Signup.css";
+import { useHistory } from "react-router-dom";
 
 export default () => {
+  let history = useHistory();
+
   // states for interface options
   const studentId = 10001000;
   const [semester, setSemester] = React.useState("Fall");
@@ -598,12 +602,28 @@ export default () => {
         </Button>
       </Grid>
       <Grid item xs={10} style={{ padding: "1em" }}>
-        <Typography
-          variant="h3"
-          style={{ fontWeight: 200, marginBottom: "0.25em" }}
-        >
-          Schedule of Courses
-        </Typography>
+        <Grid container alignItems="center">
+          <Grid item xs={8}>
+            <Typography
+              variant="h3"
+              style={{ fontWeight: 200, marginBottom: "0.25em" }}
+            >
+              Schedule of Courses
+            </Typography>
+          </Grid>
+          <Grid item xs={4}>
+            <Button
+              className="addcoursebutton"
+              color="primary"
+              startIcon={<ExitIcon />}
+              onClick={() => {
+                history.push("/");
+              }}
+            >
+              Return to Schedule
+            </Button>
+          </Grid>
+        </Grid>
         <Paper>
           <Typography style={{ padding: "1em" }}>
             {courseInstances.length} results
